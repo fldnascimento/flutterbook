@@ -8,12 +8,19 @@ import '../editor/editor.dart';
 import '../utils/utils.dart';
 
 abstract class Control<T> {
-  Control(this.label, this.value, this.initial, this.description);
+  Control(
+    this.label,
+    this.value,
+    this.initial,
+    this.description,
+    this.valueDefault,
+  );
 
   final String description;
   final String label;
   final T initial;
   T value;
+  final Widget? valueDefault;
 
   Widget build();
 }
@@ -45,12 +52,18 @@ abstract class ControlsInterface {
     required List<ListItem<T>> list,
     required T value,
     String description,
+    Widget? valueDefault,
   });
 }
 
 class BoolControl extends Control<bool> {
-  BoolControl(String label, bool value, bool initial, String description)
-      : super(label, value, initial, description);
+  BoolControl(
+    String label,
+    bool value,
+    bool initial,
+    String description,
+    Widget? valueDefault,
+  ) : super(label, value, initial, description, valueDefault);
 
   @override
   Widget build() => BoolControlWidget(label, value, initial, description);
@@ -59,13 +72,14 @@ class BoolControl extends Control<bool> {
 class BoolControlWidget extends StatefulWidget {
   const BoolControlWidget(
       this.label, this.value, this.initial, this.description,
-      {Key? key})
+      {Key? key, this.valueDefault})
       : super(key: key);
 
   final String label;
   final bool value;
   final bool initial;
   final String description;
+  final Widget? valueDefault;
 
   @override
   _BoolControlWidgetState createState() => _BoolControlWidgetState();
@@ -85,7 +99,7 @@ class _BoolControlWidgetState extends State<BoolControlWidget> {
     return _BaseControlLayout(
       label: widget.label,
       desc: widget.description,
-      def: widget.initial.toString(),
+      def: widget.valueDefault ?? Text(widget.initial.toString()),
       control: Row(
         children: [
           Expanded(child: Text(value.toString())),
@@ -115,8 +129,9 @@ class _BoolControlWidgetState extends State<BoolControlWidget> {
 }
 
 class StringControl extends Control<String> {
-  StringControl(String label, String value, String initial, String description)
-      : super(label, value, initial, description);
+  StringControl(String label, String value, String initial, String description,
+      Widget? valueDefault)
+      : super(label, value, initial, description, valueDefault);
 
   @override
   Widget build() => StringControlWidget(label, value, initial, description);
@@ -125,20 +140,21 @@ class StringControl extends Control<String> {
 class StringControlWidget extends StatelessWidget {
   const StringControlWidget(
       this.label, this.value, this.initial, this.description,
-      {Key? key})
+      {Key? key, this.valueDefault})
       : super(key: key);
 
   final String label;
   final String value;
   final String initial;
   final String description;
+  final Widget? valueDefault;
 
   @override
   Widget build(BuildContext context) {
     return _BaseControlLayout(
       label: label,
       desc: description,
-      def: initial.toString(),
+      def: valueDefault ?? Text(initial.toString()),
       control: TextFormField(
         initialValue: initial,
         cursorWidth: 1,
@@ -158,8 +174,8 @@ class StringControlWidget extends StatelessWidget {
 
 class NumberControl extends Control<double> {
   NumberControl(String label, double value, double initial, String description,
-      this.min, this.max)
-      : super(label, value, initial, description);
+      this.min, this.max, Widget? valueDefault)
+      : super(label, value, initial, description, valueDefault);
 
   final double min;
   final double max;
@@ -172,7 +188,7 @@ class NumberControl extends Control<double> {
 class NumberControlWidget extends StatefulWidget {
   const NumberControlWidget(this.label, this.value, this.initial,
       this.description, this.min, this.max,
-      {Key? key})
+      {Key? key, this.valueDefault})
       : super(key: key);
 
   final String label;
@@ -181,6 +197,7 @@ class NumberControlWidget extends StatefulWidget {
   final String description;
   final double min;
   final double max;
+  final Widget? valueDefault;
 
   @override
   _NumberControlWidgetState createState() => _NumberControlWidgetState();
@@ -200,7 +217,7 @@ class _NumberControlWidgetState extends State<NumberControlWidget> {
     return _BaseControlLayout(
       label: widget.label,
       desc: widget.description,
-      def: widget.initial.toString(),
+      def: widget.valueDefault ?? Text(widget.initial.toString()),
       control: Row(
         children: [
           Expanded(child: Text(value.toStringAsFixed(0))),
@@ -238,7 +255,7 @@ class _BaseControlLayout extends StatelessWidget {
 
   final String label;
   final String desc;
-  final String def;
+  final Widget def;
   final Widget control;
 
   @override
@@ -260,7 +277,7 @@ class _BaseControlLayout extends StatelessWidget {
         ),
         Expanded(
           flex: 2,
-          child: Text(def),
+          child: def,
         ),
         Expanded(
           flex: 2,
@@ -273,17 +290,29 @@ class _BaseControlLayout extends StatelessWidget {
 
 class ListControl<T> extends Control<T> {
   final List<ListItem<T>> list;
-  ListControl(String label, T value, T initial, String description, this.list)
-      : super(label, value, initial, description);
+  ListControl(
+    String label,
+    T value,
+    T initial,
+    String description,
+    this.list,
+    Widget? valueDefault,
+  ) : super(label, value, initial, description, valueDefault);
 
   @override
-  Widget build() =>
-      ListControlWidget<T>(label, value, initial, description, list);
+  Widget build() => ListControlWidget<T>(
+        label,
+        value,
+        initial,
+        description,
+        list,
+        valueDefault,
+      );
 }
 
 class ListControlWidget<T> extends StatefulWidget {
-  const ListControlWidget(
-      this.label, this.value, this.initial, this.description, this.list,
+  const ListControlWidget(this.label, this.value, this.initial,
+      this.description, this.list, this.valueDefault,
       {Key? key})
       : super(key: key);
 
@@ -292,6 +321,7 @@ class ListControlWidget<T> extends StatefulWidget {
   final T initial;
   final String description;
   final List<ListItem<T>> list;
+  final Widget? valueDefault;
 
   @override
   State<ListControlWidget<T>> createState() => _ListControlWidgetState<T>();
@@ -305,8 +335,8 @@ class _ListControlWidgetState<T> extends State<ListControlWidget<T>> {
   void initState() {
     listValues = widget.list;
     if (widget.list.any((element) => element.title == widget.initial)) {
-      value = widget.list
-          .firstWhere((element) => element.title == widget.initial);
+      value =
+          widget.list.firstWhere((element) => element.title == widget.initial);
     } else {
       value = widget.list.first;
     }
@@ -333,7 +363,7 @@ class _ListControlWidgetState<T> extends State<ListControlWidget<T>> {
     return _BaseControlLayout(
       label: widget.label,
       desc: widget.description,
-      def: widget.initial.toString(),
+      def: widget.valueDefault ?? Text(widget.initial.toString()),
       control: DropdownButton<ListItem<T>>(
         items: items,
         dropdownColor: Theme.of(context).scaffoldBackgroundColor,

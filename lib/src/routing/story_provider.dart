@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import '../navigation/models/organizers.dart';
 import 'controls.dart';
@@ -31,18 +31,36 @@ class StoryProvider extends ChangeNotifier implements ControlsInterface {
   bool _disposed = false;
 
   @override
-  bool boolean(
-          {required String label,
-          bool initial = false,
-          String description = kDefaultNoDescMessage}) =>
-      addControl(BoolControl(label, initial, initial, description));
+  bool boolean({
+    required String label,
+    Widget? valueDefault,
+    bool initial = false,
+    String description = kDefaultNoDescMessage,
+  }) =>
+      addControl(
+        BoolControl(
+          label,
+          initial,
+          initial,
+          description,
+          valueDefault,
+        ),
+      );
 
   @override
-  String text(
-          {required String label,
-          String initial = '',
-          String description = kDefaultNoDescMessage}) =>
-      addControl(StringControl(label, initial, initial, description));
+  String text({
+    required String label,
+    Widget? valueDefault,
+    String initial = '',
+    String description = kDefaultNoDescMessage,
+  }) =>
+      addControl(StringControl(
+        label,
+        initial,
+        initial,
+        description,
+        valueDefault,
+      ));
 
   T addControl<T>(Control<T> value) =>
       (_controls.putIfAbsent(value.label, () => value) as Control<T>).value;
@@ -60,11 +78,22 @@ class StoryProvider extends ChangeNotifier implements ControlsInterface {
   double number({
     required String label,
     required double initial,
+    Widget? valueDefault,
     double max = 1,
     double min = 0,
     String description = kDefaultNoDescMessage,
   }) =>
-      addControl(NumberControl(label, initial, initial, description, min, max));
+      addControl(
+        NumberControl(
+          label,
+          initial,
+          initial,
+          description,
+          min,
+          max,
+          valueDefault,
+        ),
+      );
 
   @override
   void dispose() {
@@ -85,8 +114,18 @@ class StoryProvider extends ChangeNotifier implements ControlsInterface {
     required T initial,
     required List<ListItem<T>> list,
     required T value,
+    Widget? valueDefault,
     String description = kDefaultNoDescMessage,
   }) {
-    return addControl(ListControl<T>(label, value, initial, description, list));
+    return addControl(
+      ListControl<T>(
+        label,
+        value,
+        initial,
+        description,
+        list,
+        valueDefault,
+      ),
+    );
   }
 }

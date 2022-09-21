@@ -73,6 +73,14 @@ Button.primary(
                             label: "Color",
                             initial: Colors.red,
                             value: Colors.red,
+                            valueDefault: Align(
+                              alignment: Alignment.centerLeft,
+                              child: Container(
+                                height: 20,
+                                width: 20,
+                                color: Colors.red,
+                              ),
+                            ),
                             list: [
                               ListItem(title: "Red", value: Colors.red),
                               ListItem(title: "Blue", value: Colors.blue),
